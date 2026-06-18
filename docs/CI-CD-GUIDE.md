@@ -23,7 +23,7 @@ Bu sənəd **Email Delivery** ekosistemində avtomatik build, push və deploy-un
 
 | Layihə | GitHub repo | Image adı | `.env` açarı | Compose servisi | Port |
 |--------|-------------|-----------|--------------|-----------------|------|
-| Backend | `email-delivery` | `email-delivery-backend` | `BACKEND_IMAGE` | `backend` | 8091 |
+| Backend | `email-delivery` | `email-delivery-backend` | `BACKEND_IMAGE` | `backend` | 8092 |
 | Frontend | `email-delivery-ui` | `email-delivery-frontend` | `FRONTEND_IMAGE` | `frontend` | 8093 |
 
 Tam image formatı: `ingressgroup/<image-adı>:<tag>`  
@@ -49,7 +49,7 @@ Məsələn: `ingressgroup/email-delivery-backend:v1.0.0.1`
 
 | Secret | Default |
 |--------|---------|
-| `FRONTEND_API_URL` | `http://65.21.51.215:8091/admin/v1` |
+| `FRONTEND_API_URL` | `http://65.21.51.215:8092/admin/v1` |
 
 ---
 
@@ -76,7 +76,7 @@ Serverdə yoxlama:
 
 ```bash
 ssh -p 2222 test@65.21.51.215 'grep BACKEND_IMAGE /root/email-delivery/.env && docker ps --filter name=email-delivery-backend'
-curl -s http://65.21.51.215:8091/actuator/health
+curl -s http://65.21.51.215:8092/actuator/health
 ```
 
 ---
@@ -101,31 +101,68 @@ cd /root/email-delivery
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-Deploy user (`test`) üçün — **PMS `/root/hotel` ilə eyni** (bir dəfə root kimi):
+### Server deploy user icazəsi (əl ilə) — vacib
+
+GitHub Actions SSH ilə `DEPLOY_USER` (məs. `test`) qoşulur və `.env`-də `sed -i` ilə `BACKEND_IMAGE` / `FRONTEND_IMAGE` yeniləyir. **PMS `/root/hotel` üçün etdiyiniz `setfacl` burada `/root/email-delivery` üçündür.**
+
+Ətraflı addım-addım: **[SERVER-DEPLOY-SETUP.md](./SERVER-DEPLOY-SETUP.md)**
+
+#### 1. Serverə root kimi daxil olun
 
 ```bash
-# Serverdə email-delivery repo-dan və ya skripti köçürüb:
+ssh -p 2222 root@65.21.51.215
+```
+
+#### 2. Qovluğu yoxlayın / yaradın
+
+```bash
+mkdir -p /root/email-delivery
+ls -la /root/email-delivery
+```
+
+`DEPLOY_PATH` secret fərqlidirsə, həmin yolu istifadə edin.
+
+#### 3. Deploy user — docker qrupu
+
+```bash
+usermod -aG docker test
+```
+
+#### 4. Qovluq icazəsi (setfacl)
+
+```bash
+setfacl -R -m u:test:rwx /root/email-delivery
+setfacl -R -d -m u:test:rwx /root/email-delivery
+```
+
+`setfacl` yoxdursa:
+
+```bash
+chown -R root:test /root/email-delivery
+chmod -R g+rwX /root/email-delivery
+```
+
+#### 5. `.env` yazıla bilən olsun
+
+```bash
+chmod 664 /root/email-delivery/.env
+```
+
+#### 6. Skript ilə (alternativ)
+
+```bash
 sudo DEPLOY_USER=test DEPLOY_PATH=/root/email-delivery bash scripts/server-deploy-setup.sh
 ```
 
-Əl ilə:
+#### 7. Yoxlama
 
 ```bash
-sudo usermod -aG docker test
-sudo mkdir -p /root/email-delivery
-sudo setfacl -R -m u:test:rwx /root/email-delivery
-sudo setfacl -R -d -m u:test:rwx /root/email-delivery
-sudo chmod 664 /root/email-delivery/.env   # .env artıq varsa
+sudo -u test test -w /root/email-delivery && echo "qovluq OK"
+sudo -u test test -w /root/email-delivery/.env && echo ".env OK"
+sudo -u test docker compose version
 ```
 
-Yoxlama (`test` user ilə):
-
-```bash
-test -w /root/email-delivery && echo OK
-grep BACKEND_IMAGE /root/email-delivery/.env
-```
-
-`setfacl` olmadan `sed -i .env` xətası: `Permission denied` / `couldn't open temporary file`.
+`setfacl` olmadan xəta: `sed: couldn't open temporary file ... Permission denied`
 
 ---
 
@@ -151,7 +188,7 @@ APP_SECRET_KEY=<jwt-secret>
 ADMIN_BOOTSTRAP_ENABLED=true
 ADMIN_BOOTSTRAP_EMAIL=admin@example.com
 ADMIN_BOOTSTRAP_PASSWORD=<admin-parol>
-ADMIN_PUBLIC_BASE_URL=http://65.21.51.215:8091
+ADMIN_PUBLIC_BASE_URL=http://65.21.51.215:8092
 ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS=http://localhost:*,http://127.0.0.1:*,http://65.21.51.215:8093
 
 MAIL_HOST=smtp.example.com
@@ -160,7 +197,7 @@ MAIL_USERNAME=
 MAIL_PASSWORD=
 ADMIN_MAIL_FROM=noreply@example.com
 
-VITE_ADMIN_API_URL=http://65.21.51.215:8091/admin/v1
+VITE_ADMIN_API_URL=http://65.21.51.215:8092/admin/v1
 ```
 
 Pipeline hər deploy-da yalnız `BACKEND_IMAGE` / `FRONTEND_IMAGE` sətirlərini avtomatik yeniləyir.
@@ -207,8 +244,8 @@ Pipeline hər deploy-da yalnız `BACKEND_IMAGE` / `FRONTEND_IMAGE` sətirlərini
 
 | Xəta | Həll |
 |------|------|
-| `sed: couldn't open temporary file ... Permission denied` | Serverdə `setfacl` (yuxarıdakı setup skripti) |
-| `Permission denied` `/root/email-delivery` | Serverdə deploy user icazəsi (`setfacl`) |
+| `sed: couldn't open temporary file ... Permission denied` | [SERVER-DEPLOY-SETUP.md](./SERVER-DEPLOY-SETUP.md) — `setfacl` |
+| `Permission denied` `/root/email-delivery` | [SERVER-DEPLOY-SETUP.md](./SERVER-DEPLOY-SETUP.md) — deploy user icazəsi |
 | `docker compose` icazə | `usermod -aG docker test` |
 | `DEPLOY_PATH not found` | Secret: `/root/email-delivery` |
 | Tag işləmir | Tag `v` ilə başlamalıdır |
@@ -231,6 +268,7 @@ Pipeline hər deploy-da yalnız `BACKEND_IMAGE` / `FRONTEND_IMAGE` sətirlərini
 |------|--------|
 | `.github/workflows/deploy-backend.yml` | CI/CD workflow |
 | `scripts/server-deploy-setup.sh` | Serverdə deploy user icazəsi (setfacl + docker) |
+| `docs/SERVER-DEPLOY-SETUP.md` | Server icazəsi — əl ilə addımlar |
 | `scripts/build-and-push.sh` | CI-də image build/push |
 | `docker-compose.prod.yml` | Prod stack (serverdə `/root/email-delivery`) |
 | `docker-compose.yml` | Local DB + Adminer |

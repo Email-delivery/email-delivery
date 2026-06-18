@@ -9,7 +9,7 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 
 ENV PORT=8090
 
-# Container daxilində 8090; prod host portu docker-compose.prod.yml-də 8091:8090
+# Container daxilində 8090; prod host portu docker-compose.prod.yml-də 8092:8090
 EXPOSE 8090
 
 ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=$PORT"]

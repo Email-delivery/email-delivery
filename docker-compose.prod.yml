@@ -24,7 +24,7 @@ services:
     container_name: email-delivery-backend
     restart: unless-stopped
     ports:
-      - "${BACKEND_HOST_PORT:-8091}:8090"
+      - "${BACKEND_HOST_PORT:-8092}:8090"
     environment:
       PORT: 8090
       DB_CONNECTION_IP: db
@@ -38,7 +38,7 @@ services:
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       ADMIN_BOOTSTRAP_FIRST_NAME: ${ADMIN_BOOTSTRAP_FIRST_NAME:-Admin}
       ADMIN_BOOTSTRAP_LAST_NAME: ${ADMIN_BOOTSTRAP_LAST_NAME:-User}
-      ADMIN_PUBLIC_BASE_URL: ${ADMIN_PUBLIC_BASE_URL:-http://localhost:8091}
+      ADMIN_PUBLIC_BASE_URL: ${ADMIN_PUBLIC_BASE_URL:-http://localhost:8092}
       ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS: ${ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
       ADMIN_CORS_MAX_AGE_SECONDS: ${ADMIN_CORS_MAX_AGE_SECONDS:-3600}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
@@ -62,7 +62,7 @@ services:
       context: ../email-delivery-ui
       dockerfile: Dockerfile
       args:
-        VITE_ADMIN_API_URL: ${VITE_ADMIN_API_URL:-http://localhost:8091/admin/v1}
+        VITE_ADMIN_API_URL: ${VITE_ADMIN_API_URL:-http://localhost:8092/admin/v1}
     container_name: email-delivery-frontend
     restart: unless-stopped
     ports:
