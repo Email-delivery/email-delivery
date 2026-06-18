@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: email-delivery-db
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-password}
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: ${DB_NAME:-email_delivery}
+    ports:
+      - "${DB_HOST_PORT:-3319}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-password}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+
+  adminer:
+    image: adminer
+    container_name: email-delivery-adminer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${ADMINER_HOST_PORT:-8589}:8080"
+
+volumes:
+  db_data:

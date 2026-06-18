@@ -1,0 +1,24 @@
+admin:
+  email:
+    max-recipients-per-request: 500
+    max-attachments-per-email: 5
+    max-attachment-bytes: 10485760
+    max-subject-length: 200
+    max-html-body-length: 500000
+    public-base-url: ${ADMIN_PUBLIC_BASE_URL:http://localhost:8090}
+
+spring:
+  mail:
+    host: ${MAIL_HOST:smtp.yandex.com.tr}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:info@ingress.az}
+    password: ${MAIL_PASSWORD:mlppzdhotfcuvwxv}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: false
+    protocol: smtp
