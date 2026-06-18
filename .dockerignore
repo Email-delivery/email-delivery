@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gradle
+build
+out
+bin
+.idea
+*.iml
+.vscode
+.cursor
+**/terminals
+docker-compose*.yml
+.env
+.env.*

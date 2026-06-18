@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: email-delivery
+  profiles:
+    include:
+      - security
+      - db
+      - email
+  threads:
+    virtual:
+      enabled: true
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+server:
+  port: ${PORT:8090}
+  tomcat:
+    uri-encoding: utf-8
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      enabled: true
+
+admin:
+  bootstrap:
+    enabled: ${ADMIN_BOOTSTRAP_ENABLED:true}
+    email: ${ADMIN_BOOTSTRAP_EMAIL:aladdin19.11.21@gmail.com}
+    password: ${ADMIN_BOOTSTRAP_PASSWORD:Aladdin12}
+    first-name: ${ADMIN_BOOTSTRAP_FIRST_NAME:Aladdin}
+    last-name: ${ADMIN_BOOTSTRAP_LAST_NAME:Biyabangerd}
+  security:
+    access-token-ttl-minutes: ${ADMIN_ACCESS_TOKEN_TTL_MINUTES:480}
+    refresh-token-validity-days: ${ADMIN_REFRESH_TOKEN_VALIDITY_DAYS:7}
+    password-reset-expiration-minutes: ${ADMIN_PASSWORD_RESET_EXPIRATION_MINUTES:15}
+  mail:
+    from: ${ADMIN_MAIL_FROM:info@ingress.az}

@@ -1,0 +1,12 @@
+security:
+  jwtProperties:
+    # Shared with stay-board (PMS) and stay-board-rms so a single business-owner token works everywhere.
+    secret: ${APP_SECRET_KEY:VFdGdUlHbHpJR1JwYzNScGJtZDFhWE5vWldRc0lHNXZkQ0J2Ym14NUlHSjVJR2hwY3lCeVpXRnpiMjRzSUdKMWRDQXVMaTQ5UmVhZHkgZm9yIGFkdmVudHVyZXMuIFRoZSBuZXcgUEVVR0VPVCA1MDA4IHJldmFtcHMgdGhlIG1vZGVybml0eSBvZiBpdHMgc2lsaG91ZXR0ZSwgd2l0aCBlbGVnYW5jZSBhbmQgbWF0dXJpdHksIHN0cmlraW5nIGEgcGVyZmVjdCBiYWxhbmNlIGJldHdlZW4gcG93ZXIgYW5kIHJlZmluZW1lbnQu}
+  cookie:
+    secure: ${COOKIE_SECURE:false}
+    same-site: ${COOKIE_SAME_SITE:Lax}
+
+admin:
+  cors:
+    allowed-origin-patterns: ${ADMIN_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,http://65.21.51.215:8022,http://65.21.51.215:8023}
+    max-age-seconds: ${ADMIN_CORS_MAX_AGE_SECONDS:3600}
